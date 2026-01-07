@@ -24,6 +24,7 @@ class Api {
 
     if (kDebugMode) {
       print("RESPONSE GET : $baseUrl$endPoint");
+
       print("RESPONSE STATUS CODE : ${response.statusCode}");
       print("RESPONSE BODY : ${response.body}");
     }
@@ -47,6 +48,8 @@ class Api {
 
     if (kDebugMode) {
       print("RESPONSE POST : $baseUrl$endPoint");
+      print("RESPONSE POST BODY : $body");
+
       print("RESPONSE STATUS CODE : ${response.statusCode}");
       print("RESPONSE BODY : ${response.body}");
     }
@@ -98,11 +101,6 @@ class Api {
 
     return response;
   }
-
-  // TODO Complete upload Functionality
-  // Future<List>upload(
-  //   File file
-  // ){}
 
   Future<Response> upload(File file) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -1,9 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:gallery_picker/gallery_picker.dart';
-import 'package:gallery_picker/models/media_file.dart';
 import 'package:provider/provider.dart';
 import 'package:saees_cards/helpers/consts.dart';
 import 'package:saees_cards/helpers/functions_helper.dart';
@@ -11,6 +7,7 @@ import 'package:saees_cards/providers/auth_provider.dart';
 import 'package:saees_cards/screens/main_screens/tabs_content/invoices_content.dart';
 import 'package:saees_cards/screens/main_screens/tabs_content/wallet_content.dart';
 import 'package:saees_cards/widgets/dialogs/custom_drawer.dart';
+import 'package:saees_cards/widgets/dialogs/scan_sheet.dart';
 
 class TabsScreen extends StatefulWidget {
   const TabsScreen({super.key});
@@ -21,6 +18,8 @@ class TabsScreen extends StatefulWidget {
 
 class _TabsScreenState extends State<TabsScreen> {
   int currentIndex = 0;
+
+  List<String> uploadedImages = [];
 
   @override
   Widget build(BuildContext context) {
@@ -70,20 +69,10 @@ class _TabsScreenState extends State<TabsScreen> {
             backgroundColor: primaryColor,
             child: Icon(Icons.qr_code, color: whiteColor),
             onPressed: () async {
-              await GalleryPicker.pickMedia(
+              showModalBottomSheet(
                 context: context,
-                singleMedia: true,
-              ).then((mediList) {
-                if (mediList!.isNotEmpty) {
-                  if (mediList.first.file != null) {
-                    authConsumer.api.upload(mediList.first.file!);
-                  }
-                }
-              });
-
-              // TODO QR Functionality
-
-              // String? qrValue ;
+                builder: (context) => ScanSheet(),
+              );
             },
           ),
         );
