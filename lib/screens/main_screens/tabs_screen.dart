@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:gallery_picker/gallery_picker.dart';
+import 'package:gallery_picker/models/media_file.dart';
 import 'package:provider/provider.dart';
 import 'package:saees_cards/helpers/consts.dart';
 import 'package:saees_cards/helpers/functions_helper.dart';
@@ -65,11 +69,21 @@ class _TabsScreenState extends State<TabsScreen> {
           floatingActionButton: FloatingActionButton(
             backgroundColor: primaryColor,
             child: Icon(Icons.qr_code, color: whiteColor),
-            onPressed: () {
-                // TODO QR Functionality 
+            onPressed: () async {
+              await GalleryPicker.pickMedia(
+                context: context,
+                singleMedia: true,
+              ).then((mediList) {
+                if (mediList!.isNotEmpty) {
+                  if (mediList.first.file != null) {
+                    authConsumer.api.upload(mediList.first.file!);
+                  }
+                }
+              });
 
-                // String? qrValue ;
+              // TODO QR Functionality
 
+              // String? qrValue ;
             },
           ),
         );
