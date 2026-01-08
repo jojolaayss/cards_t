@@ -5,11 +5,13 @@ import 'package:saees_cards/models/transactions_model.dart';
 class TransactionListItem extends StatelessWidget {
   final Transaction transaction;
   const TransactionListItem({super.key, required this.transaction});
-  //TODO Task2-3
+
   @override
   Widget build(BuildContext context) {
-    bool isCredit = transaction.type == 'credit';
-    Color statusColor = isCredit ? Colors.green : Colors.red;
+    if (transaction.type != 'credit') {
+      return const SizedBox.shrink();
+    }
+    Color statusColor = Colors.green;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -35,9 +37,7 @@ class TransactionListItem extends StatelessWidget {
                   radius: 20,
                   backgroundColor: statusColor.withValues(alpha: 0.1),
                   child: Icon(
-                    isCredit
-                        ? Icons.add_circle_outline
-                        : Icons.remove_circle_outline,
+                    Icons.add_circle_outline,
                     color: statusColor,
                     size: 20,
                   ),
@@ -50,12 +50,9 @@ class TransactionListItem extends StatelessWidget {
                       transaction.reference,
                       style: labelSmall.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    Text(
-                      isCredit ? "إيداع رصيد" : "سحب رصيد",
-                      style: labelSmall.copyWith(
-                        color: Colors.grey,
-                        fontSize: 10,
-                      ),
+                    const Text(
+                      "إيداع رصيد",
+                      style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                     if (transaction.description != null)
                       Text(
@@ -73,7 +70,7 @@ class TransactionListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  "${isCredit ? '+' : '-'}${transaction.amount} LYD",
+                  "+${transaction.amount} LYD",
                   style: labelSmall.copyWith(
                     color: statusColor,
                     fontWeight: FontWeight.bold,
