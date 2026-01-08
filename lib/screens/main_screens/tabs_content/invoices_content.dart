@@ -6,6 +6,7 @@ import 'package:saees_cards/helpers/functions_helper.dart';
 import 'package:saees_cards/models/invoice_model.dart';
 import 'package:saees_cards/providers/invoices_provider.dart';
 import 'package:saees_cards/widgets/statics/shimmer_widget.dart';
+//TODO Task 5-1-2
 
 class InvoicesContent extends StatefulWidget {
   const InvoicesContent({super.key});
@@ -15,35 +16,77 @@ class InvoicesContent extends StatefulWidget {
 }
 
 class _InvoicesContentState extends State<InvoicesContent> {
+  final ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
-    Provider.of<InvoicesProvider>(context, listen: false).getInvoices();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<InvoicesProvider>(
+        context,
+        listen: false,
+      ).getInvoices(isRefresh: true);
+    });
+
+    scrollController.addListener(() {
+      final provider = Provider.of<InvoicesProvider>(context, listen: false);
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200) {
+        if (!provider.busy && provider.hasNextPage) {
+          provider.getInvoices();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<InvoicesProvider>(
       builder: (context, invoicesConsumer, _) {
-        return ListView.builder(
-          itemCount: invoicesConsumer.busy
-              ? 10
-              : invoicesConsumer.invoices.length,
-          itemBuilder: (context, index) {
-            return AnimatedSwitcher(
-              duration: 300.milliseconds,
+        if (invoicesConsumer.busy && invoicesConsumer.invoices.isEmpty) {
+          return ListView.builder(
+            itemCount: 10,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                height: getSize(context).height * 0.1,
+                child: const ShimmerWidget(),
+              ),
+            ),
+          );
+        }
 
-              child: invoicesConsumer.busy
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        height: getSize(context).height * 0.1,
-                        child: ShimmerWidget(),
-                      ),
-                    )
-                  : InvoiceCard(invoiceModel: invoicesConsumer.invoices[index]),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () async =>
+              await invoicesConsumer.getInvoices(isRefresh: true),
+          child: ListView.builder(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount:
+                invoicesConsumer.invoices.length +
+                (invoicesConsumer.hasNextPage ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == invoicesConsumer.invoices.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              final invoice = invoicesConsumer.invoices[index];
+              return AnimatedSwitcher(
+                duration: 300.milliseconds,
+                key: ValueKey(invoice.invoiceNumber),
+                child: InvoiceCard(invoiceModel: invoice),
+              );
+            },
+          ),
         );
       },
     );
@@ -53,6 +96,7 @@ class _InvoicesContentState extends State<InvoicesContent> {
 class InvoiceCard extends StatelessWidget {
   const InvoiceCard({super.key, required this.invoiceModel});
   final InvoiceModel invoiceModel;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -61,7 +105,7 @@ class InvoiceCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: whiteColor,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               offset: Offset(1, 2),
@@ -86,7 +130,7 @@ class InvoiceCard extends StatelessWidget {
                   Text(invoiceModel.family.name, style: labelSmall),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -94,7 +138,6 @@ class InvoiceCard extends StatelessWidget {
                     invoiceModel.invoiceNumber,
                     style: labelSmall.copyWith(color: Colors.grey),
                   ),
-
                   Text(
                     "${invoiceModel.amount} LYD",
                     style: labelMedium.copyWith(color: greenColor),

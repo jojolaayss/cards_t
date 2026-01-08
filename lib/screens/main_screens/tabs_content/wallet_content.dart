@@ -16,16 +16,37 @@ class WalletContent extends StatefulWidget {
   State<WalletContent> createState() => _WalletContentState();
 }
 
-//TODO Task2-4
 class _WalletContentState extends State<WalletContent> {
+  final ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    //Future.microtask(() {
-    if (!mounted) return;
-    Provider.of<AuthProvider>(context, listen: false).getWallet();
-    Provider.of<TransactionsProvider>(context, listen: false).getTransactions();
-    // });
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 100) {
+        Provider.of<TransactionsProvider>(
+          context,
+          listen: false,
+        ).getTransactions();
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Provider.of<AuthProvider>(context, listen: false).getWallet();
+      Provider.of<TransactionsProvider>(
+        context,
+        listen: false,
+      ).getTransactions(isRefresh: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -62,7 +83,7 @@ class _WalletContentState extends State<WalletContent> {
           Expanded(
             child: Consumer<TransactionsProvider>(
               builder: (context, transConsumer, _) {
-                if (transConsumer.busy) {
+                if (transConsumer.busy && transConsumer.transactions.isEmpty) {
                   return ListView.builder(
                     itemCount: 5,
                     itemBuilder: (context, index) => const Padding(
@@ -80,9 +101,21 @@ class _WalletContentState extends State<WalletContent> {
                 }
 
                 return ListView.builder(
+                  controller: scrollController,
                   padding: const EdgeInsets.only(bottom: 20),
-                  itemCount: transConsumer.transactions.length,
+                  itemCount:
+                      transConsumer.transactions.length +
+                      (transConsumer.isFetchingMores ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index == transConsumer.transactions.length) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    }
+
                     return TransactionListItem(
                       transaction: transConsumer.transactions[index],
                     );
