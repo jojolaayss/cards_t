@@ -31,16 +31,19 @@ class _PlaceInvoiceSheetState extends State<PlaceInvoiceSheet> {
   Widget build(BuildContext context) {
     return Consumer<InvoicesProvider>(
       builder: (context, invoicesConsumer, _) {
-        return BottomSheet(
-          showDragHandle: true,
-          onClosing: () {},
-
-          builder: (context) {
-            return Form(
+        //TODO Task1
+        return Padding(
+          padding: EdgeInsetsGeometry.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            child: Form(
               key: formKey,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text("Add Invoice", style: displaySmall),
@@ -150,10 +153,11 @@ class _PlaceInvoiceSheetState extends State<PlaceInvoiceSheet> {
                     },
                     title: "Add",
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );

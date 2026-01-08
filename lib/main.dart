@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:saees_cards/providers/auth_provider.dart';
 import 'package:saees_cards/providers/invoices_provider.dart';
+import 'package:saees_cards/providers/transactions_provider.dart';
 import 'package:saees_cards/screens/auth_screens/intro_screen.dart';
 import 'package:saees_cards/screens/auth_screens/splash_screen.dart';
 import 'package:saees_cards/screens/handling_screens/loading_screen.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => InvoicesProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionsProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

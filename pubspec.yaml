@@ -48,6 +48,8 @@ dependencies:
   mobile_scanner:
   qr_flutter:
   cached_network_image:
+  infinite_scroll_pagination:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
